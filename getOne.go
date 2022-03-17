@@ -20,6 +20,7 @@ import (
 var db *sql.DB
 var left int //商品的库存,在初始化时就绪
 var rab *rabbitmq.RabbitMQ
+var Here = make(chan string, 100) //全局通道变量,用于传输订单消费状态
 
 func init() {
 	rab = rabbitmq.NewRabbitMQSimple("product")
@@ -73,29 +74,28 @@ func NewProduct(table, productNum string) *numControl {
 var mutex sync.Mutex
 
 // GetOneProduct 获取秒杀商品
-func GetOneProduct() bool {
+func GetOneProduct() {
 	//加锁
 	mutex.Lock()
 	defer mutex.Unlock()
 	if left > 0 {
-		message := datamodels.Message{1, 2}
-		//类型转换
-		byteMessage, err := json.Marshal(message)
-		if err != nil {
-			log.Fatalln(err)
-			return false
-		}
-		//4.生产消息
-		err = rab.PublishSimple(string(byteMessage))
-		if err != nil {
-			log.Fatalln(err)
-			return false
-		}
-		left--
-		fmt.Println("left: ", left)
-		return true
+		go func() {
+			message := datamodels.Message{1, 2}
+			//类型转换
+			byteMessage, err := json.Marshal(message)
+			if err != nil {
+				log.Fatalln(err)
+			}
+			//4.生产消息
+			err = rab.PublishSimple(string(byteMessage))
+			if err != nil {
+				log.Fatalln(err)
+			}
+			left--
+			fmt.Println("left: ", left)
+			Here <- "success"
+		}()
 	}
-	return false
 }
 
 func GetProduct(w http.ResponseWriter, req *http.Request) {
@@ -117,11 +117,10 @@ func GetProduct(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	w.Write([]byte("false"))*/
-	if GetOneProduct() {
-		w.Write([]byte("true"))
-		return
-	}
-	w.Write([]byte("false"))
+	GetOneProduct()
+	msg := <-Here
+	w.Write([]byte(msg))
+	return
 }
 
 func main() {
