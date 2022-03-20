@@ -8,7 +8,7 @@ import (
 
 // NewMysqlConn 创建mysql连接
 func NewMysqlConn() (db *sql.DB, err error) {
-	db, err = sql.Open("mysql", "root:62748226@tcp(192.168.1.101:3306)/gorush?charset=utf8")
+	db, err = sql.Open("mysql", "root:62748226@tcp(192.168.1.102:3306)/gorush?charset=utf8")
 	return
 }
 

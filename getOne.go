@@ -20,7 +20,7 @@ import (
 var db *sql.DB
 var left int //商品的库存,在初始化时就绪
 var rab *rabbitmq.RabbitMQ
-var Here = make(chan string, 100) //全局通道变量,用于传输订单消费状态
+var Here = make(chan bool, 1000) //全局通道变量,用于传输订单消费状态
 
 func init() {
 	rab = rabbitmq.NewRabbitMQSimple("product")
@@ -75,9 +75,9 @@ var mutex sync.Mutex
 
 // GetOneProduct 获取秒杀商品
 func GetOneProduct() {
-	//加锁
-	mutex.Lock()
-	defer mutex.Unlock()
+	////加锁
+	//mutex.Lock()
+	//defer mutex.Unlock()
 	if left > 0 {
 		go func() {
 			message := datamodels.Message{1, 2}
@@ -93,8 +93,10 @@ func GetOneProduct() {
 			}
 			left--
 			fmt.Println("left: ", left)
-			Here <- "success"
+			Here <- true
 		}()
+	} else {
+		Here <- false
 	}
 }
 
@@ -119,7 +121,13 @@ func GetProduct(w http.ResponseWriter, req *http.Request) {
 	w.Write([]byte("false"))*/
 	GetOneProduct()
 	msg := <-Here
-	w.Write([]byte(msg))
+	if msg {
+		w.Write([]byte("true"))
+	} else {
+		w.Write([]byte("false"))
+	}
+	//msg := <-Here
+	//w.Write([]byte(msg))
 	return
 }
 
