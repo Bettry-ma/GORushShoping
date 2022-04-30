@@ -47,12 +47,12 @@ func (o *OrderManager) Insert(order *datamodels.Order) (id int64, err error) {
 	}
 	//sqlStr := `insert order set ID = ?,UserId = ?,ProductId = ?,OrderStatus = ?`
 	//sqlStr := "insert " + o.table + " set userID = ?,productID = ?,orderStatus = ?"
-	sqlStr := "insert  `order` set userID = ?,productID = ?,orderStatus = ?"
+	sqlStr := "insert  `order` set userID = ?,productID = ?,orderStatus = ?,productNum= ?"
 	stmt, err := o.mysqlConn.Prepare(sqlStr)
 	if err != nil {
 		return 0, err
 	}
-	exec, err := stmt.Exec(order.UserId, order.ProductId, order.OrderStatus)
+	exec, err := stmt.Exec(order.UserId, order.ProductId, order.OrderStatus, order.ProductNum)
 	if err != nil {
 		return 0, err
 	}

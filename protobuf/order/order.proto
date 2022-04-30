@@ -1,0 +1,10 @@
+syntax ="proto3";
+
+option go_package = "../";
+
+message Order {
+  int64 ID =1;
+  int64 UserID =2;
+  int64 ProductID =3;
+  int64 ProductNum =4;
+}

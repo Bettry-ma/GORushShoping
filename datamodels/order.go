@@ -5,6 +5,7 @@ type Order struct {
 	UserId      int64 `sql:"userID"`
 	ProductId   int64 `sql:"productID"`
 	OrderStatus int64 `sql:"orderStatus"`
+	ProductNum  int64 `sql:"productNum"`
 }
 
 //状态值

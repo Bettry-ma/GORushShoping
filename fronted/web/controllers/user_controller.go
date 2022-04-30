@@ -24,6 +24,7 @@ func (u *UserController) GetRegister() mvc.View {
 	}
 }
 
+// PostRegister  用户注册
 func (u *UserController) PostRegister() {
 	var (
 		nickName = u.Ctx.FormValue("nickName")

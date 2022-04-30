@@ -1,6 +1,6 @@
 package datamodels
 
-//简单的消息体
+//简单的订单消息体
 
 type Message struct {
 	ProductID int64

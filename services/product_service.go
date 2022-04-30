@@ -14,15 +14,15 @@ type IProductService interface {
 	DeleteProductById(id int64) (state bool)
 	InsertProduct(product *datamodels.Product) (affected int64, err error)
 	UpdateProduct(product *datamodels.Product) (err error)
-	SubNumberOne(productID int64) error
+	SubNumber(productID int64, num int64) error
 }
 
 type ProductService struct {
 	productRepository repositories.IProduct
 }
 
-func (p *ProductService) SubNumberOne(productID int64) error {
-	return p.productRepository.SubProductNum(productID)
+func (p *ProductService) SubNumber(productID int64, num int64) error {
+	return p.productRepository.SubProductNum(productID, num)
 }
 
 func NewProductService(rp repositories.IProduct) IProductService {

@@ -16,7 +16,7 @@ type IProduct interface {
 	Update(product *datamodels.Product) (err error)               //商品更新
 	SelectById(id int64) (product *datamodels.Product, err error) //根据商品id查询商品信息
 	SelectAll() (products []*datamodels.Product, err error)       //查询所有商品信息
-	SubProductNum(productID int64) error
+	SubProductNum(productID int64, num int64) error
 }
 
 // ProductManager 将实现接口
@@ -146,12 +146,13 @@ func (p *ProductManager) SelectAll() (products []*datamodels.Product, err error)
 }
 
 // SubProductNum 商品数量抢购扣除
-func (p *ProductManager) SubProductNum(productID int64) error {
+func (p *ProductManager) SubProductNum(productID int64, num int64) error {
 	if err := p.Conn(); err != nil {
 		return err
 	}
-	//sqlStr := "update " + p.table + " set productNum = productNum-1 where ID =" + strconv.FormatInt(productID, 10)
-	sqlStr := "update product set productNum = productNum -1 where ID =1"
+	subNum := strconv.FormatInt(num, 10)
+	sqlStr := "update " + p.table + " set productNum = productNum-" + subNum + " where ID =" + strconv.FormatInt(productID, 10)
+	//sqlStr := "update product set productNum = productNum -1 where ID =1"
 	stmt, err := p.mysqlConn.Prepare(sqlStr)
 	if err != nil {
 		return err

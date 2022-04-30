@@ -1,7 +1,9 @@
 package rabbitmq
 
 import (
+	"GORushShoping/rebuild/order"
 	"GORushShoping/services"
+	"encoding/json"
 	"fmt"
 	"github.com/streadway/amqp"
 	"log"
@@ -140,21 +142,20 @@ func (r *RabbitMQ) ConsumeSimple(orderService services.IOrderService, productSer
 	//启用线程处理消息
 	go func() {
 		//消息处理逻辑处理,根据业务灵活调动
-		for d := range msgs {
-			//log.Printf("Received a message: %s\n", d.Body)
-			/*message := &datamodels.Message{}
-			err := json.Unmarshal([]byte(d.Body), message)
+		for d := range msgs { // 遍历订单消息
+			log.Printf("Received a message: %s\n", d.Body)
+			message := &order.Order{}
+			err := json.Unmarshal([]byte(d.Body), message) //反序列化
 			if err != nil {
 				fmt.Println(err)
-			}*/
+			}
 			//插入订单
-			/*_, err = orderService.InsertOrderByMessage(message)
+			_, err = orderService.InsertOrderByOrder(message)
 			if err != nil {
 				fmt.Println(err)
-			}*/
+			}
 			//扣除商品数量
-			//err = productService.SubNumberOne(message.ProductID)
-			err = productService.SubNumberOne(1)
+			err = productService.SubNumber(int64(message.ProductID), int64(message.ProductNum))
 			if err != nil {
 				fmt.Println(err)
 			}

@@ -4,23 +4,22 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
-	"gopkg.in/ini.v1"
 )
 
 // NewMysqlConn 创建mysql连接
 func NewMysqlConn() (db *sql.DB, err error) {
-	conf, err := ini.Load("config.ini")
-	if err != nil {
-		return nil, fmt.Errorf("fail to read file: %v", err)
-	}
-	mysql := conf.Section("MySql")
-	host := mysql.Key("host").String()
-	port := mysql.Key("port").String()
-	user := mysql.Key("user").String()
-	password := mysql.Key("password").String()
-	database := mysql.Key("db").String()
-	db, err = sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8", user, password, host, port, database))
-	//db, err = sql.Open("mysql", "root:62748226@tcp(192.168.1.102:3306)/gorush?charset=utf8")
+	//conf, err := ini.Load("config.ini")
+	//if err != nil {
+	//	return nil, fmt.Errorf("fail to read file: %v", err)
+	//}
+	//mysql := conf.Section("MySql")
+	//host := mysql.Key("host").String()
+	//port := mysql.Key("port").String()
+	//user := mysql.Key("user").String()
+	//password := mysql.Key("password").String()
+	//database := mysql.Key("db").String()
+	//db, err = sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8", user, password, host, port, database))
+	db, err = sql.Open("mysql", "root:62748226@tcp(192.168.1.102:3306)/gorush?charset=utf8")
 	return
 }
 

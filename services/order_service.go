@@ -2,6 +2,7 @@ package services
 
 import (
 	"GORushShoping/datamodels"
+	"GORushShoping/rebuild/order"
 	"GORushShoping/repositories"
 )
 
@@ -12,11 +13,21 @@ type IOrderService interface {
 	InsertOrder(order *datamodels.Order) (affected int64, err error)
 	GetAllOrder() (orders []*datamodels.Order, err error)
 	GetAllOrderInfo() (info map[int]map[string]string, err error)
-	InsertOrderByMessage(message *datamodels.Message) (int64, error)
+	InsertOrderByMessage(message *order.Order) (int64, error)
+	InsertOrderByOrder(order *order.Order) (int64, error)
 }
 
 type OrderService struct {
 	OrderRepository repositories.IOrderRepository
+}
+
+func (o *OrderService) InsertOrderByOrder(order *order.Order) (int64, error) {
+	or := &datamodels.Order{
+		ProductId:   int64(order.ProductID),
+		UserId:      int64(order.UserID),
+		OrderStatus: datamodels.OrderSuccess,
+	}
+	return o.InsertOrder(or)
 }
 
 func NewOrderService(op repositories.IOrderRepository) IOrderService {
@@ -48,11 +59,12 @@ func (o *OrderService) GetAllOrderInfo() (info map[int]map[string]string, err er
 }
 
 // InsertOrderByMessage 根据消息创建订单
-func (o *OrderService) InsertOrderByMessage(message *datamodels.Message) (orderID int64, err error) {
-	order := &datamodels.Order{
-		UserId:      message.UserID,
-		ProductId:   message.ProductID,
+func (o *OrderService) InsertOrderByMessage(message *order.Order) (orderID int64, err error) {
+	or := &datamodels.Order{
+		UserId:      int64(message.UserID),
+		ProductId:   int64(message.ProductID),
+		ProductNum:  int64(message.ProductNum),
 		OrderStatus: datamodels.OrderSuccess,
 	}
-	return o.InsertOrder(order)
+	return o.InsertOrder(or)
 }

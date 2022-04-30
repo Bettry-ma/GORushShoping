@@ -9,6 +9,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
+	"strconv"
 	"sync"
 )
 
@@ -131,9 +133,79 @@ func GetProduct(w http.ResponseWriter, req *http.Request) {
 	return
 }
 
+func GetBuy(w http.ResponseWriter, req *http.Request) {
+	query, err := url.ParseQuery(req.URL.RawQuery)
+	if err != nil {
+		fmt.Println(err)
+	}
+	userID := query["userID"][0]
+	productID := query["productID"][0]
+	price := query["price"][0]
+	num := query["num"][0]
+	numInt, err := strconv.Atoi(num)
+	time := query["time"][0]
+	userIDInt, err := strconv.Atoi(userID)
+	fmt.Println(numInt, userIDInt)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Println(userID, productID, price, num, time)
+
+	// 库存减去 订单数量
+	var left int
+	err = db.QueryRow("select productNum from product where ID = ?", productID).Scan(&left)
+	//todo 调用数量控制接口
+	//todo if left>0 创建订单
+
+	orderInsert := &datamodels.Order{
+		//填充数据
+	}
+	fmt.Println(orderInsert)
+	sqlStr := ""
+	result, err := db.Exec(sqlStr)
+	affected, err := result.RowsAffected()
+	if affected > 0 {
+
+	}
+	//todo 通道传输剩余商品数量
+	//todo else
+	//失败逻辑
+}
+
+func GetSettleAccount(w http.ResponseWriter, req *http.Request) {
+	query, err := url.ParseQuery(req.URL.RawQuery)
+	if err != nil {
+		fmt.Println(err)
+	}
+	userID := query["userID"][0]
+	userIDInt, err := strconv.Atoi(userID)
+	fmt.Println(userIDInt)
+	if err != nil {
+		fmt.Println(err)
+	}
+	sqlStr := "select o.productNum,p.productPriceNow " +
+		" from 'order' o,product p" +
+		"where o.productId = p.ID and o.userId = " + userID + " and o.orderStatus = 0"
+	var productNum int
+	var productPriceNow int
+	account := 0
+	rows, err := db.Query(sqlStr)
+	if rows.Next() {
+		err := rows.Scan(&productNum, &productPriceNow)
+		if err != nil {
+			fmt.Println(err)
+		}
+		account += productPriceNow * productNum
+	}
+	w.Write([]byte("订单付款金额" + strconv.Itoa(account)))
+	//account -->
+}
+
 func main() {
 	defer rab.Destroy()
 	http.HandleFunc("/getOne", GetProduct)
+	http.HandleFunc("/buy", GetBuy)
 	err := http.ListenAndServe(":8088", nil)
 	fmt.Println("app is running...")
 	if err != nil {
